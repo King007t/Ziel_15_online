@@ -287,7 +287,7 @@ public void enterName() {
           uim.buttons.get(6).textlocked = true;
         inventory2.clear();
         delay(100);
-      } else if (!(key == '?' || key == TAB || key == RETURN || key == ESC || key == DELETE) &&  inventory2.size() < 10) {
+      } else if ((key == 'a' || key == 'b' || key == 'c' || key == 'd' || key == 'e' || key == 'f' || key == 'g' || key == 'h' || key == 'i' || key == 'j' || key == 'k' || key == 'l' || key == 'm' || key == 'n' || key == 'o' || key == 'p' || key == 'q' || key == 'r' || key == 's' || key == 't' || key == 'u' || key == 'v' || key == 'w' || key == 'x' || key == 'y' || key == 'z') &&  inventory2.size() < 10) {
         inventory2.append(str(key));
         //print
         input2 = inventory2.get(0);

@@ -161,7 +161,7 @@ public class SpielManager {
         upJbyOne();
       }
       delay(100);
-    } else if (!(key == '?' || key == TAB || key == RETURN || key == ESC || key == DELETE)) {
+    } else if (key == 'a' || key == 'b' || key == 'c' || key == 'd' || key == 'e' || key == 'f' || key == 'g' || key == 'h' || key == 'i' || key == 'j' || key == 'k' || key == 'l' || key == 'm' || key == 'n' || key == 'o' || key == 'p' || key == 'q' || key == 'r' || key == 's' || key == 't' || key == 'u' || key == 'v' || key == 'w' || key == 'x' || key == 'y' || key == 'z') {
       inventory.append(str(key));
       delay(100);
     }
