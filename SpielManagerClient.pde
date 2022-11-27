@@ -1,5 +1,5 @@
 public class SpielManagerClient extends SpielManager {
-  
+
   int myId = -1;
   Spieler onlineSpieler;
 
@@ -8,33 +8,62 @@ public class SpielManagerClient extends SpielManager {
   public SpielManagerClient(String ip) {
     super();
     client = new Client(Ziel_15.this, ip, 5204);
+    byte[] handShakePacket = new byte[20];
+    handShakePacket[0] = 0;
+    String name = uim.buttons.get(6).text;
+    char[] nameChars = name.toCharArray();
+
+    for (int i = 1; i < handShakePacket.length; i++) {
+
+      if (i-1 >= nameChars.length) {
+        handShakePacket[i] = -1;
+        break;
+      }
+
+      handShakePacket[i] = byte(nameChars[i-1]);
+    }
+
+    client.write(handShakePacket);
   }
-  
+
   // --- Client-Methode ---
-  
-   public void clientEvent(Client myClient) {
-     byte[] byteBuffer = new byte[10];
-     int byteCount = myClient.readBytes(byteBuffer);
-     if (byteCount == 0)
-       return;
-       
-     println("connected");
-     handlePacket(byteBuffer);
-   }
-   
-   public void handlePacket(byte[] packet){
-     if(packet[0] == 0) {
-       // handshake
-       if (myId == -1) {
-         myId = packet[1];
-         byte[] packet2 = new byte[] {0, byte(myId)};
-         client.write(packet2);
-       }
-     }  
+
+  public void sendPacket(int... packet) {
+    byte[] toSend = new byte[packet.length];
+    for (int i = 0; i < packet.length; i++) {
+      toSend[i] = byte(packet[i]);
+    }
+    client.write(toSend);
   }
-  
+
+  public void clientRefresh() {
+    if (client.available() > 0) {
+      byte[] byteBuffer = client.readBytes();
+      handlePacket(byteBuffer);
+    }
+  }
+
+  public void handlePacket(byte[] packet) {
+    switch(packet[0]) {
+      case(0):
+        if (myId == -1) {
+          myId = (int)packet[1];
+          println("Angemeldet als client: " + myId);
+        }
+        break;
+      case(1):
+        init();
+        break;
+    }
+  }
+
   // --- Spielablauf-Methode ---
-  
+
+  protected void init() {
+    surface.setTitle("Ziel_15: Online_Match");
+    meldeDialog("Server sagt start");
+  }
+
 
   public void spielAblauf() {
     //clientRefresh(client);

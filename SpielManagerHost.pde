@@ -1,6 +1,6 @@
 public class SpielManagerHost extends SpielManager {
 
-  private ArrayList<Client> clients = new ArrayList();
+  public HashMap<String, Client> clientMap = new HashMap<>();
 
   // --- Konstruktoren ---
 
@@ -12,29 +12,37 @@ public class SpielManagerHost extends SpielManager {
   // --- Server-Methode ---
 
   public void serverRefresh() {
-    Client currentClient = server.available();
-    if (currentClient == null)
-      return;
-
-    println("connection established");
-    byte[] byteBuffer = new byte[10];
-    int byteCount = currentClient.readBytes(byteBuffer);
-    if (byteCount > 0)
-      handlePacket(byteBuffer);
-  }
-
-  public void handlePacket(byte[] packet) {
-    if (packet[0] == 0) {
-      isConnected = true;
+    if (server.available() != null) {
+      byte[] byteBuffer = new byte[20];
+      int byteCount = server.available().readBytes(byteBuffer);
+      if (byteCount > 0)
+        handlePacket(server.available(), byteBuffer);
     }
   }
 
-  public void serverEvent(Server myServer, Client newClient) {
-    if (myServer != server)
-      return;
-    clients.add(newClient);
-    byte[] packet = new byte[] {0, byte(clients.size() - 1)};
-    server.write(packet);
+  public void handlePacket(Client sender, byte[] packet) {
+    if (packet[0] == 0) {
+      //isConnected = true;
+       String name = "";
+       for(int i = 1; i < packet.length; i++){
+           if(packet[i] == -1)
+             break;
+             
+           name += char(packet[i]);
+       }
+       clientMap.put(name, sender);
+       byte[] newPacket = new byte[] {0, byte(clientMap.size() - 1)};
+       server.write(newPacket);
+       isConnected = true;
+    }
+  }
+  
+  public void sendPacket(int... packet){
+    byte[] toSend = new byte[packet.length];
+    for(int i = 0; i < packet.length; i++){
+      toSend[i] = byte(packet[i]);
+    }
+     server.write(toSend);
   }
 
   // --- Spielablauf-Methode ---
@@ -43,6 +51,9 @@ public class SpielManagerHost extends SpielManager {
   // --- Logik-Methoden ---
 
   protected void init() {
+    
+    sendPacket(1);
+    
     surface.setTitle("Ziel_15: Online_Match");
     akSpieler.add(new Spieler(uim.buttons.get(6).text));
     akSpieler.add(new Spieler(onlineName));

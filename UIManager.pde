@@ -206,8 +206,11 @@ public class JoinButton extends Button {
 
   // --- Konstruktoren ---
 
-  public JoinButton(int x, int y, int w, int h, String text, int s) {
+  private TextBoxButton ipBox;
+
+  public JoinButton(int x, int y, int w, int h, String text, int s, TextBoxButton textBox) {
     super(x, y, w, h, text, s);
+    this.ipBox = textBox;
   }
 
   // --- Methoden ---
@@ -219,7 +222,7 @@ public class JoinButton extends Button {
     uim.buttons.get(2).caninteract = false;
     uim.buttons.get(3).caninteract = false;
     uim.buttons.get(6).caninteract = false;
-    gamemode(2, text);
+    gamemode(2, ipBox.text);
   }
 }
 

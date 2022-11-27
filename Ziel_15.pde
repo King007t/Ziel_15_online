@@ -1,5 +1,13 @@
 import processing.net.*;
 
+/**
+=================================
+|                               |
+|      Nick's Networking        |
+|                               |
+=================================
+**/
+
 // --- Attribute (Objektvariablen) ---
 
 public boolean isConnected = false;
@@ -17,6 +25,7 @@ public UIManager uim = new UIManager();
 // gamemode 0: offline | gamemode 1: host | gamemode 2: client
 public void gamemode(int gamemode, String ip) {
   this.gamemode = gamemode;
+  println(ip);
   manager = gamemode == 1 ? new SpielManagerHost(): gamemode == 2 ? new SpielManagerClient(ip) : new SpielManager();
 }
 
@@ -32,7 +41,7 @@ void setup() {
   uim.buttons.get(2).caninteract = false;
   uim.register(new HostButton(170, 185, 120, 50, "Host", 20));
   uim.buttons.get(3).caninteract = false;
-  uim.register(new JoinButton(300, 185, 120, 50, "Join", 20));
+  uim.register(new JoinButton(300, 185, 120, 50, "Join", 20, (TextBoxButton)uim.buttons.get(2)));
   uim.buttons.get(4).caninteract = false;
   uim.register(new StartButton(400, 400, 150, 50, "Start", 20));
   uim.buttons.get(5).caninteract = false;
@@ -52,8 +61,25 @@ void draw() {
     multiplayerMenu();
   } else if (programmstart == 60 * 3 + 3) {
     hostMenu();
+    
+    if(manager == null)
+       return;
+    
+    if(manager instanceof SpielManagerHost){
+       ((SpielManagerHost)manager).serverRefresh();
+    }
+    else if (manager instanceof SpielManagerClient){
+       ((SpielManagerClient)manager).clientRefresh();
+    }
+    
   } else {
     manager.spielAblauf();
+    if(manager instanceof SpielManagerHost){
+       ((SpielManagerHost)manager).serverRefresh();
+    }
+    else if (manager instanceof SpielManagerClient){
+       ((SpielManagerClient)manager).clientRefresh();
+    }
   }
   uim.render();
 }
@@ -189,7 +215,6 @@ public void multiplayerMenu() {
 }
 
 public void hostMenu() {
-  manager.serverRefresh();
   background(#98DDFF);
   fill(#F5D100);
   rect(100, 50, width - 2 * 100, height - 2 * 150);
@@ -198,7 +223,12 @@ public void hostMenu() {
   textSize(30);
 
   if (isConnected) {
-    text("A Player is connected", 100, 50, width - 2 * 100, height - 2 * 150);
+    int counter = 0;
+    for(String s : ((SpielManagerHost)manager).clientMap.keySet()){
+        text(s, 100, 50*counter, width-2*100, height-2*150);
+        counter++;
+    }
+    
   } else {
     text("Waiting for Players", 100, 50, width - 2 * 100, height - 2 * 150);
   }
