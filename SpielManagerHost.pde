@@ -1,7 +1,7 @@
 public class SpielManagerHost extends SpielManager {
 
-  public HashMap<String, Client> clientMap = new HashMap<>();
-
+  public ArrayList<Client> clientMap = new ArrayList<>();
+  public ArrayList<String> names = new ArrayList<>();
   // --- Konstruktoren ---
 
   public SpielManagerHost() {
@@ -21,36 +21,51 @@ public class SpielManagerHost extends SpielManager {
   }
 
   public void handlePacket(Client sender, byte[] packet) {
-    //handshake
-    if (packet[0] == 0) {
-      if (programmstart == 60 * 3 + 1) {
-        sendPacket(0,-1);
-        return;
-      }
-       String name = "";
-       for(int i = 1; i < packet.length; i++){
-           if(packet[i] == -1)
-             break;
-             
-           name += char(packet[i]);
-       }
-       clientMap.put(name, sender);
-       byte[] newPacket = new byte[] {0, byte(clientMap.size() - 1)};
-       server.write(newPacket);
-       isConnected = true;
-    }
-    // disconnect
-    if (packet[0] == 2) {
-      clientMap.remove(packet[1]);
+    
+    if(!clientMap.contains(sender) && packet[0] != 0)
+      return;
+
+    println(packet);
+    switch(packet[0]) {  
+      case(0): //handshake
+        if (programmstart == 60 * 3 + 1) {
+          sendPacket(0, -1);
+          return;
+        }
+        String name = "";
+        for (int i = 1; i < packet.length; i++) {
+          if (packet[i] == -1)
+            break;
+          name += char(packet[i]);
+        }
+        clientMap.add(sender);
+        names.add(name);
+        byte[] newPacket = new byte[] {0, byte(clientMap.size() - 1)};
+        server.write(newPacket);
+        isConnected = true;
+        break;
+      case(2): // disconnect
+        clientMap.remove(int(packet[1]));
+        names.remove(int(packet[1]));
+        if (clientMap.size() == 0)
+          isConnected = false;
+        sendPacket(2,packet[1]);
+        break;
     }
   }
-  
-  public void sendPacket(int... packet){
+
+  public void sendPacket(int... packet) {
     byte[] toSend = new byte[packet.length];
-    for(int i = 0; i < packet.length; i++){
+    for (int i = 0; i < packet.length; i++) {
       toSend[i] = byte(packet[i]);
     }
-     server.write(toSend);
+    server.write(toSend);
+  }
+  
+  void disconnect() {
+    sendPacket(2, 1, 1);
+    server.stop();
+    isConnected = false;
   }
 
   // --- Spielablauf-Methode ---
@@ -59,9 +74,9 @@ public class SpielManagerHost extends SpielManager {
   // --- Logik-Methoden ---
 
   protected void init() {
-    
+
     sendPacket(1);
-    
+
     surface.setTitle("Ziel_15: Online_Match");
     akSpieler.add(new Spieler(uim.buttons.get(6).text));
     akSpieler.add(new Spieler(onlineName));

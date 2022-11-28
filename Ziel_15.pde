@@ -244,7 +244,7 @@ public void hostMenu() {
   if (isConnected) {
     uim.buttons.get(5).caninteract = true;
     int counter = 0;
-    for (String s : ((SpielManagerHost)manager).clientMap.keySet()) {
+    for (String s : ((SpielManagerHost)manager).names) {
       text(s, 100, 50*counter, width-2*100, height-2*150);
       counter++;
     }
@@ -264,14 +264,25 @@ public void joinMenu() {
   textAlign(CENTER, CENTER);
   fill(0);
   textSize(30);
-  if (jointext == "Das Spiel läuft bereits" ) {
+  if (jointext == "Das Spiel läuft bereits" || jointext == "Verbindung zum Host verloren") {
     text(jointext, 100, 35, width - 2 * 100, height - 2 * 150);
     textSize(20);
     text("Zurück zum Menü in " + (3 - (manager.j / 60)), 100, 75, width - 2 * 100, height - 2 * 150);
+    manager.j++;
   } else
-    text(jointext, 100, 50, width - 2 * 100, height - 2 * 150);
-  manager.j++;
-  if (jointext == "Das Spiel läuft bereits" && manager.j == 60 * 3) {
+    if (manager.client.active() == false) { 
+      text("Verbindung Fehlgeschlagen", 100, 35, width - 2 * 100, height - 2 * 150);
+      textSize(20);
+      text("Erneuter Versuch in " + (3 - (manager.j / 60)), 100, 75, width - 2 * 100, height - 2 * 150);
+      
+      if (manager.j == 60 * 3) {
+        manager.j = 0;
+        gamemode(2, uim.buttons.get(2).text);
+      }
+      manager.j++;
+    } else
+      text(jointext, 100, 50, width - 2 * 100, height - 2 * 150);
+  if ((jointext == "Das Spiel läuft bereits" || jointext == "Verbindung zum Host verloren")&& manager.j == 60 * 3) {
     manager.client.stop();
     manager.reset();
     programmstart = 0;

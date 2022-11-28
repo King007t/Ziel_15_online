@@ -1,6 +1,6 @@
 public class SpielManagerClient extends SpielManager {
 
-  int myId = -1;
+  public int myId = -1;
   Spieler onlineSpieler;
 
   // --- Konstruktoren ---
@@ -44,12 +44,14 @@ public class SpielManagerClient extends SpielManager {
   }
 
   public void handlePacket(byte[] packet) {
+    println(packet);
     switch(packet[0]) {
       case(0): //handshake
       if (myId == -1) {
         myId = (int)packet[1];
         if (myId == -1) {
           jointext = "Das Spiel läuft bereits";
+          manager.j = 0;
           return;
         }
       }
@@ -57,9 +59,23 @@ public class SpielManagerClient extends SpielManager {
       case(1): //gamestart
       init();
       break;
+      case(2): //disconnect
+      if (int(packet[2]) == 1) {
+        jointext = "Verbindung zum Host verloren";
+        manager.j = 0;
+        return;
+      }
+      if (myId == int(packet[1]))
+        client.stop();
+      else if (myId > int(packet[1]))
+        myId--;
+      break;
     }
   }
 
+  void disconnect() {
+    sendPacket(2, myId);
+  }
   // --- Spielablauf-Methode ---
 
   protected void init() {

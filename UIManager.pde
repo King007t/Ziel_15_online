@@ -136,9 +136,7 @@ public class ReturnButton extends Button {
 
   // --- Methoden ---
 
-  public void onClick() {
-    manager.reset();
-    programmstart = 0;
+  public void onClick() { 
     caninteract = false;
     uim.buttons.get(2).caninteract = false;
     uim.buttons.get(2).reset();
@@ -148,11 +146,18 @@ public class ReturnButton extends Button {
     uim.buttons.get(6).caninteract = false;
     uim.buttons.get(6).reset();
     uim.buttons.get(0).caninteract = true;
-    if (gamemode == 1)
-      manager.server.stop();
-    if (gamemode == 2)
-      manager.client.stop();
-    gamemode(0, null);
+    if (programmstart == 60 * 3 + 4){
+      ((SpielManagerClient)manager).disconnect();
+      gamemode(0, null);
+    }
+    if (programmstart == 60 * 3 + 3) {
+      ((SpielManagerHost)manager).disconnect();
+      gamemode(0, null);
+    }
+    if (programmstart == 60 * 3 + 2) {
+      gamemode(0, null);
+    }
+    programmstart = 0;
   }
 }
 
