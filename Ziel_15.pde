@@ -1,12 +1,12 @@
 import processing.net.*;
 
 /**
-=================================
-|                               |
-|      Nick's Networking        |
-|                               |
-=================================
-**/
+ =================================
+ |                               |
+ |      Nick's Networking        |
+ |                               |
+ =================================
+ **/
 
 // --- Attribute (Objektvariablen) ---
 
@@ -14,10 +14,11 @@ public boolean isConnected = false;
 public int programmstart = 0;
 public String input;
 public String input2;
+public String jointext;
 public int gamemode = 0;
 public StringList inventory = new StringList();
 public StringList inventory2 = new StringList();
-public SpielManager manager = new SpielManager();
+public SpielManager manager;
 public UIManager uim = new UIManager();
 
 // --- Game Mode ---
@@ -25,13 +26,14 @@ public UIManager uim = new UIManager();
 // gamemode 0: offline | gamemode 1: host | gamemode 2: client
 public void gamemode(int gamemode, String ip) {
   this.gamemode = gamemode;
-  println(ip);
+  //println(ip);
   manager = gamemode == 1 ? new SpielManagerHost(): gamemode == 2 ? new SpielManagerClient(ip) : new SpielManager();
 }
 
-// -----------------
+// --- Setup ---
 
 void setup() {
+  gamemode(0, null);
   size(600, 500, P3D);
   surface.setTitle("Ziel_15: Startbildschirm");
   uim.register(new MultiplayerButton(50, 400, 150, 50, "Multiplayer", 20));
@@ -49,6 +51,8 @@ void setup() {
   uim.buttons.get(6).caninteract = false;
 }
 
+// --- Draw ---
+
 void draw() {
   if (width > 600 || height > 500) {
     surface.setSize(600, 500);
@@ -61,24 +65,30 @@ void draw() {
     multiplayerMenu();
   } else if (programmstart == 60 * 3 + 3) {
     hostMenu();
-    
-    if(manager == null)
-       return;
-    
-    if(manager instanceof SpielManagerHost){
-       ((SpielManagerHost)manager).serverRefresh();
+
+    if (manager == null)
+      return;
+
+    if (manager instanceof SpielManagerHost) {
+      ((SpielManagerHost)manager).serverRefresh();
+    } else if (manager instanceof SpielManagerClient) {
+      ((SpielManagerClient)manager).clientRefresh();
     }
-    else if (manager instanceof SpielManagerClient){
-       ((SpielManagerClient)manager).clientRefresh();
+  } else if (programmstart == 60 * 3 + 4) {
+    joinMenu();
+
+    if (manager == null)
+      return;
+
+    if (manager instanceof SpielManagerClient) {
+      ((SpielManagerClient)manager).clientRefresh();
     }
-    
   } else {
     manager.spielAblauf();
-    if(manager instanceof SpielManagerHost){
-       ((SpielManagerHost)manager).serverRefresh();
-    }
-    else if (manager instanceof SpielManagerClient){
-       ((SpielManagerClient)manager).clientRefresh();
+    if (manager instanceof SpielManagerHost) {
+      ((SpielManagerHost)manager).serverRefresh();
+    } else if (manager instanceof SpielManagerClient) {
+      ((SpielManagerClient)manager).clientRefresh();
     }
   }
   uim.render();
@@ -181,7 +191,6 @@ public void multiplayerMenu() {
   fill(#F5D100);
   rect(100, 50, width - 2 * 100, height - 2 * 150);
   //fake host
-  //uim.register(new HostButton(170, 185, 120, 50, "Host", 20));
   stroke(#FFFFFF);
   strokeWeight(5);
   fill(190);
@@ -218,19 +227,54 @@ public void hostMenu() {
   background(#98DDFF);
   fill(#F5D100);
   rect(100, 50, width - 2 * 100, height - 2 * 150);
+  //fake start
+  stroke(#FFFFFF);
+  strokeWeight(5);
+  fill(190);
+  rect(400, 400, 150, 50);
+  fill(0);
+  textAlign(CENTER, CENTER);
+  text("Start", 400, 400, 150, 50);
+  textAlign(TOP, LEFT);
+  fill(#F5D100);
+  //
   textAlign(CENTER, CENTER);
   fill(0);
   textSize(30);
-
   if (isConnected) {
+    uim.buttons.get(5).caninteract = true;
     int counter = 0;
-    for(String s : ((SpielManagerHost)manager).clientMap.keySet()){
-        text(s, 100, 50*counter, width-2*100, height-2*150);
-        counter++;
+    for (String s : ((SpielManagerHost)manager).clientMap.keySet()) {
+      text(s, 100, 50*counter, width-2*100, height-2*150);
+      counter++;
     }
-    
   } else {
-    text("Waiting for Players", 100, 50, width - 2 * 100, height - 2 * 150);
+    uim.buttons.get(5).caninteract = false;
+    text("Warte auf Spieler", 100, 50, width - 2 * 100, height - 2 * 150);
+  }
+  textSize(20);
+  fill(#F5D100);
+  textAlign(TOP, LEFT);
+}
+
+public void joinMenu() {
+  background(#98DDFF);
+  fill(#F5D100);
+  rect(100, 50, width - 2 * 100, height - 2 * 150);
+  textAlign(CENTER, CENTER);
+  fill(0);
+  textSize(30);
+  if (jointext == "Das Spiel läuft bereits" ) {
+    text(jointext, 100, 35, width - 2 * 100, height - 2 * 150);
+    textSize(20);
+    text("Zurück zum Menü in " + (3 - (manager.j / 60)), 100, 75, width - 2 * 100, height - 2 * 150);
+  } else
+    text(jointext, 100, 50, width - 2 * 100, height - 2 * 150);
+  manager.j++;
+  if (jointext == "Das Spiel läuft bereits" && manager.j == 60 * 3) {
+    manager.client.stop();
+    manager.reset();
+    programmstart = 0;
   }
   textSize(20);
   fill(#F5D100);
@@ -258,13 +302,7 @@ public void enterIP() {
           delay(100);
         }
       } else if (key == ENTER) {
-        uim.buttons.get(2).show = false;
-        if (uim.buttons.get(2).text == "|" || inventory.size() != 15) {
-          uim.buttons.get(2).text = "Invalid IP-Adress";
-        } else
-          uim.buttons.get(2).textlocked = true;
-        inventory.clear();
-        delay(100);
+        confirmIp();
       } else if ((key == '0' || key == '1' || key == '2' || key == '3' || key == '4' || key == '5' || key == '6' || key == '7' || key == '8' || key == '9') &&  inventory.size() < 15) {
         inventory.append(str(key));
         if (inventory.size() == 3 || inventory.size() == 7 || inventory.size() == 11)
@@ -291,6 +329,16 @@ public void enterIP() {
   }
 }
 
+void confirmIp() {
+  uim.buttons.get(2).show = false;
+  if (uim.buttons.get(2).text == "|" || uim.buttons.get(2).text.length() != 15) {
+    uim.buttons.get(2).text = "Invalid IP-Adress";
+  } else
+    uim.buttons.get(2).textlocked = true;
+  inventory.clear();
+  delay(100);
+}
+
 public void enterName() {
   if (uim.buttons.get(6).show == true) {
     if (keyPressed) {
@@ -310,13 +358,7 @@ public void enterName() {
           delay(100);
         }
       } else if (key == ENTER) {
-        uim.buttons.get(6).show = false;
-        if (uim.buttons.get(6).text == "|" || uim.buttons.get(6).text.equals(manager.cheaterName) || uim.buttons.get(6).text.equals(manager.botName) || uim.buttons.get(6).text.equals(manager.onlineName)) {
-          uim.buttons.get(6).text = "Invalid Name";
-        } else
-          uim.buttons.get(6).textlocked = true;
-        inventory2.clear();
-        delay(100);
+        confirmName();
       } else if ((key == 'a' || key == 'b' || key == 'c' || key == 'd' || key == 'e' || key == 'f' || key == 'g' || key == 'h' || key == 'i' || key == 'j' || key == 'k' || key == 'l' || key == 'm' || key == 'n' || key == 'o' || key == 'p' || key == 'q' || key == 'r' || key == 's' || key == 't' || key == 'u' || key == 'v' || key == 'w' || key == 'x' || key == 'y' || key == 'z') &&  inventory2.size() < 10) {
         inventory2.append(str(key));
         //print
@@ -338,6 +380,29 @@ public void enterName() {
     rotateX(millis()/700.0);
     box(13);
     pop();
+  }
+}
+
+void confirmName() {
+  uim.buttons.get(6).show = false;
+  if (uim.buttons.get(6).text == "|" || uim.buttons.get(6).text.equals(manager.cheaterName) || uim.buttons.get(6).text.equals(manager.botName) || uim.buttons.get(6).text.equals(manager.onlineName)) {
+    uim.buttons.get(6).text = "Invalid Name";
+  } else
+    uim.buttons.get(6).textlocked = true;
+  inventory2.clear();
+  delay(100);
+}
+
+void confirmOther(String text) {
+  if (text == "Enter IP-Adress") {
+    if (uim.buttons.get(6).text == "Enter Name")
+      return;
+    confirmName();
+  }
+  if (text == "Enter Name") {
+    if (uim.buttons.get(2).text == "Enter IP-Adress")
+      return;
+    confirmIp();
   }
 }
 

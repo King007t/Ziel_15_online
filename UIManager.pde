@@ -137,6 +137,7 @@ public class ReturnButton extends Button {
   // --- Methoden ---
 
   public void onClick() {
+    manager.reset();
     programmstart = 0;
     caninteract = false;
     uim.buttons.get(2).caninteract = false;
@@ -178,6 +179,7 @@ public class TextBoxButton extends Button {
     textlocked = false;
     text = show? text : "|";
     show = true;
+    confirmOther(textbackup);
   }
 }
 
@@ -222,6 +224,7 @@ public class JoinButton extends Button {
     uim.buttons.get(2).caninteract = false;
     uim.buttons.get(3).caninteract = false;
     uim.buttons.get(6).caninteract = false;
+    jointext = "Warte auf Host";
     gamemode(2, ipBox.text);
   }
 }

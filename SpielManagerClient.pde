@@ -45,21 +45,28 @@ public class SpielManagerClient extends SpielManager {
 
   public void handlePacket(byte[] packet) {
     switch(packet[0]) {
-      case(0):
+      case(0): //handshake
+      if (myId == -1) {
+        myId = (int)packet[1];
         if (myId == -1) {
-          myId = (int)packet[1];
-          println("Angemeldet als client: " + myId);
+          jointext = "Das Spiel läuft bereits";
+          return;
         }
-        break;
-      case(1):
-        init();
-        break;
+      }
+      break;
+      case(1): //gamestart
+      init();
+      break;
     }
   }
 
   // --- Spielablauf-Methode ---
 
   protected void init() {
+    uim.buttons.get(1).caninteract = false;
+    programmstart = 60 * 3 + 1;
+    meldeDialog("Angemeldet als client: " + myId);
+    meldeDialog("------------------------------------");
     surface.setTitle("Ziel_15: Online_Match");
     meldeDialog("Server sagt start");
   }

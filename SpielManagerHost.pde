@@ -21,8 +21,12 @@ public class SpielManagerHost extends SpielManager {
   }
 
   public void handlePacket(Client sender, byte[] packet) {
+    //handshake
     if (packet[0] == 0) {
-      //isConnected = true;
+      if (programmstart == 60 * 3 + 1) {
+        sendPacket(0,-1);
+        return;
+      }
        String name = "";
        for(int i = 1; i < packet.length; i++){
            if(packet[i] == -1)
@@ -34,6 +38,10 @@ public class SpielManagerHost extends SpielManager {
        byte[] newPacket = new byte[] {0, byte(clientMap.size() - 1)};
        server.write(newPacket);
        isConnected = true;
+    }
+    // disconnect
+    if (packet[0] == 2) {
+      clientMap.remove(packet[1]);
     }
   }
   

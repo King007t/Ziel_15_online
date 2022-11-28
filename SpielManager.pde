@@ -23,7 +23,14 @@ public class SpielManager {
   // --- Konstruktoren ---
 
   public SpielManager() {
-    reset();
+    spieler = 0;
+    mode = 0;
+    j = 0;
+    input = null;
+    input2 = null;
+    inventory.clear();
+    console.clear();
+    akSpieler.clear();
   }
 
   // --- Reset-Methode ---
@@ -37,6 +44,11 @@ public class SpielManager {
     inventory.clear();
     console.clear();
     akSpieler.clear();
+    for (Button bt : uim.buttons)
+      bt.caninteract = false;
+    uim.buttons.get(0).caninteract = true;
+    if (gamemode == 1 || gamemode == 2)
+      gamemode(0, null);
   }
 
   // --- getter-Methoden ---
@@ -286,6 +298,8 @@ public class SpielManager {
     return val;
   }
   // --- wish abstract ---
-  public void handlePacket(byte[] packet){}
-  public void serverRefresh(){}
+  public void handlePacket(byte[] packet) {
+  }
+  public void serverRefresh() {
+  }
 }
