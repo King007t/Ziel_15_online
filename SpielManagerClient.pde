@@ -60,7 +60,8 @@ public class SpielManagerClient extends SpielManager {
       init();
       break;
       case(2): //disconnect
-      if (int(packet[2]) == 1) {
+      println((int)packet[1]);
+      if ((int) packet[1] == -1) {
         jointext = "Verbindung zum Host verloren";
         manager.j = 0;
         return;

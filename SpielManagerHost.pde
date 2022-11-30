@@ -63,7 +63,7 @@ public class SpielManagerHost extends SpielManager {
   }
   
   void disconnect() {
-    sendPacket(2, 1, 1);
+    sendPacket(2, -1);
     server.stop();
     isConnected = false;
   }
