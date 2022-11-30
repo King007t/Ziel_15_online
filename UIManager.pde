@@ -136,7 +136,7 @@ public class ReturnButton extends Button {
 
   // --- Methoden ---
 
-  public void onClick() { 
+  public void onClick() {
     caninteract = false;
     uim.buttons.get(2).caninteract = false;
     uim.buttons.get(2).reset();
@@ -146,7 +146,7 @@ public class ReturnButton extends Button {
     uim.buttons.get(6).caninteract = false;
     uim.buttons.get(6).reset();
     uim.buttons.get(0).caninteract = true;
-    if (programmstart == 60 * 3 + 4){
+    if (programmstart == 60 * 3 + 4) {
       ((SpielManagerClient)manager).disconnect();
       gamemode(0, null);
     }

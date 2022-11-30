@@ -103,7 +103,8 @@ public class SpielManager {
           gewonnen();
         } else {
           surface.setTitle("Ziel_15: Aktives Spiel");
-          if (keyPressed && akSpieler.get(spieler).getGZN()) {
+          // sets gzn mid game
+          if (keyPressed && akSpieler.get(spieler) instanceof ZnSpieler) {
             setZn();
           }
           akSpieler.get(spieler).spieleRunde();
@@ -202,12 +203,15 @@ public class SpielManager {
   public void upJbyOne() {
     j++;
     if (input3 > 0) {
-      akSpieler.add(new Spieler(input2, input3));
+      akSpieler.add(new ZnSpieler(input2, input3));
       input3 = 0;
       mode -=1;
     } else {
       meldeDialog( "Name: " + input2);
-      akSpieler.add(new Spieler(input2));
+      if (input2.equals(botName))
+        akSpieler.add(new BotSpieler(input2));
+      else
+        akSpieler.add(new Spieler(input2));
     }
     if (j < Integer.valueOf(input)) {
       meldeDialog("------------------------------------");
@@ -218,7 +222,7 @@ public class SpielManager {
     input2 = null;
     if (j >= Integer.valueOf(input)) {
       if (2 > Integer.valueOf(input)) {
-        akSpieler.add(new Spieler(botName));
+        akSpieler.add(new BotSpieler(botName));
         meldeDialog("------------------------------------");
         meldeDialog("Da das Spiel für zwei Spieler oder mehr gedacht ist,");
         meldeDialog("wird Spieler 2 durch den Computer übernommen.");
@@ -301,5 +305,8 @@ public class SpielManager {
   public void handlePacket(byte[] packet) {
   }
   public void serverRefresh() {
+  }
+  
+  public void sendPacket(int... packet) {
   }
 }

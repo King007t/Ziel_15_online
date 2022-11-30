@@ -21,36 +21,36 @@ public class SpielManagerHost extends SpielManager {
   }
 
   public void handlePacket(Client sender, byte[] packet) {
-    
-    if(!clientMap.contains(sender) && packet[0] != 0)
+
+    if (!clientMap.contains(sender) && packet[0] != 0)
       return;
 
     println(packet);
-    switch(packet[0]) {  
+    switch(packet[0]) {
       case(0): //handshake
-        if (programmstart == 60 * 3 + 1) {
-          sendPacket(0, -1);
-          return;
-        }
-        String name = "";
-        for (int i = 1; i < packet.length; i++) {
-          if (packet[i] == -1)
-            break;
-          name += char(packet[i]);
-        }
-        clientMap.add(sender);
-        names.add(name);
-        byte[] newPacket = new byte[] {0, byte(clientMap.size() - 1)};
-        server.write(newPacket);
-        isConnected = true;
-        break;
+      if (programmstart == 60 * 3 + 1) {
+        sendPacket(0, -1);
+        return;
+      }
+      String name = "";
+      for (int i = 1; i < packet.length; i++) {
+        if (packet[i] == -1)
+          break;
+        name += char(packet[i]);
+      }
+      clientMap.add(sender);
+      names.add(name);
+      byte[] newPacket = new byte[] {0, byte(clientMap.size() - 1)};
+      server.write(newPacket);
+      isConnected = true;
+      break;
       case(2): // disconnect
-        clientMap.remove(int(packet[1]));
-        names.remove(int(packet[1]));
-        if (clientMap.size() == 0)
-          isConnected = false;
-        sendPacket(2,packet[1]);
-        break;
+      clientMap.remove(int(packet[1]));
+      names.remove(int(packet[1]));
+      if (clientMap.size() == 0)
+        isConnected = false;
+      sendPacket(2, packet[1]);
+      break;
     }
   }
 
@@ -61,7 +61,7 @@ public class SpielManagerHost extends SpielManager {
     }
     server.write(toSend);
   }
-  
+
   void disconnect() {
     sendPacket(2, -1);
     server.stop();
@@ -70,16 +70,32 @@ public class SpielManagerHost extends SpielManager {
 
   // --- Spielablauf-Methode ---
 
+  public void spielAblauf() {
+    if (mode >= 3) {
+      if (akSpieler.size() > 0 && akSpieler.get(akSpieler.size() - 1).getAnzWuerfe() >= 10) {
+        surface.setTitle("Ziel_15: Erneut spielen?");
+        gewonnen();
+      } else {
+        surface.setTitle("Ziel_15: aktives_Online_Match");
+        akSpieler.get(spieler).spieleRunde();
+      }
+    }
+    refresh();
+  }
 
   // --- Logik-Methoden ---
 
   protected void init() {
-
     sendPacket(1);
-
-    surface.setTitle("Ziel_15: Online_Match");
-    akSpieler.add(new Spieler(uim.buttons.get(6).text));
-    akSpieler.add(new Spieler(onlineName));
+    surface.setTitle("Ziel_15: pre_Online_Match");
+    akSpieler.add(new OnlineSpielerHost(uim.buttons.get(6).text));
+    for (Client client : clientMap) {
+      akSpieler.add(new OnlineSpielerReciever(names.get(clientMap.indexOf(client)), clientMap.indexOf(client)));
+      akSpieler.get(akSpieler.size() - 1).anmelden(this);
+    }
+    meldeDialog("Angemeldet als Spieler: 1");
+    meldeDialog("Dein Name: " + uim.buttons.get(6).text);
+    meldeDialog("------------------------------------");
     meldeDialog("ONLINE SPIEL START:");
     meldeDialog("------------------------------------");
     meldeDialog("Spieler " + (spieler + 1) + ": " + akSpieler.get(spieler).name + " ist am Zug");

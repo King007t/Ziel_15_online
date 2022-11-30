@@ -6,15 +6,15 @@ public class Spieler {
   public int packetAction = 0;
 
   // Beschreiben die Eigenschaften eines Spielers
-  private String name;
-  private int aktStand;
-  private int aktWurf;
-  private int anzWuerfe;
-  private int anzGewertet;
-  private boolean bereitsGewuerfelt;
-  private boolean hideMessage;
-  private int playertype;
-  private Wuerfel wuerfel;
+  protected String name;
+  protected int aktStand;
+  protected int aktWurf;
+  protected int anzWuerfe;
+  protected int anzGewertet;
+  protected boolean bereitsGewuerfelt;
+  protected boolean hideMessage;
+  protected Wuerfel wuerfel;
+  protected SpielManager manager;
 
   // --- Konstruktoren ---
 
@@ -23,27 +23,21 @@ public class Spieler {
   // Ein Spielername wie "Horst" ist in "Anfuehrungszeichen" anzugeben.
   public Spieler(String name) {
     this.name = name;
-    reset(0);
-  }
-
-  public Spieler(String name, int gznWurf) {
-    this.name = name;
-    reset(gznWurf);
+    reset();
   }
 
   // --- Reset-Methode ---
 
   // Nochmal von vorne anfangen: Alle Attributswerte
   // zuruecksetzen, damit nochmal gespielt werden kann.
-  public void reset(int gzn) {
+  public void reset() {
     aktStand    = 0;
     aktWurf     = 0;
     anzWuerfe   = 0;
     anzGewertet = 0;
     bereitsGewuerfelt  = false;
     hideMessage  = false;
-    playertype = name.equals(manager.botName) ? 1 : name.equals(manager.onlineName) ? 2 : 0;
-    wuerfel = gzn > 0 ? new Wuerfel(gzn) : new Wuerfel();
+    wuerfel = new Wuerfel();
   }
 
   // --- getter-Methoden ---
@@ -96,6 +90,10 @@ public class Spieler {
   public void setAugenzahl(int augenzahl) {
     wuerfel.setAugenzahl(augenzahl);
   }
+  
+  public void anmelden(SpielManager manager) {
+    this.manager = manager;
+  }
 
   // --- Spiel-Methoden ---
 
@@ -144,7 +142,7 @@ public class Spieler {
   // Entscheidet wie entschieden wird.
   // Bei Mensch wertungsDialog oder bei Bot Zufallsausgabe.
   public int pruefe() {
-    return playertype == 1 ? wertungsBot() : playertype == 2 ? onlineDialog(): wertungsDialog();
+    return wertungsDialog();
   }
 
   // Wuerfeln, Wurfergebnis in aktWurf speichern.
@@ -202,32 +200,5 @@ public class Spieler {
     String dialog = val == 1 ? "gewertet" : "nicht gewertet";
     meldeDialog(dialog);
     return val;
-  }
-
-  // Algorithmus, um effizient in der Nähe von 15, oder auf 15 zu landen.
-  public int wertungsBot() {
-    meldeDialog("Der Computer hat eine " + aktWurf + " gewuerfelt.");
-    int diff = 15 - aktStand;
-    int med = round(diff/ (6 - anzGewertet));
-    if (anzGewertet == 5 && aktWurf == med) {
-      meldeDialog("gewertet");
-      return 1;
-    } else if (aktWurf <= med && anzGewertet != 5) {
-      meldeDialog("gewertet");
-      return 1;
-    } else {
-      meldeDialog("nicht gewertet");
-      return 2;
-    }
-  }
-
-  public int onlineDialog() {
-    if (newPacket && packetAction != 0) {
-      int action = packetAction;
-      newPacket = false;
-      packetAction = 0;
-      return action;
-    }
-    return 0;
   }
 }

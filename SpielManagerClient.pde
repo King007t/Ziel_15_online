@@ -74,6 +74,10 @@ public class SpielManagerClient extends SpielManager {
       else if (myId > int(packet[1]))
         myId--;
       break;
+      case(3): //syncronisation
+      if ((int)packet[2] == myId)
+        
+      break;
     }
   }
 
@@ -82,44 +86,29 @@ public class SpielManagerClient extends SpielManager {
   }
   // --- Spielablauf-Methode ---
 
+  public void spielAblauf() {
+    if (mode >= 3) {
+      if (akSpieler.size() > 0 && akSpieler.get(akSpieler.size() - 1).getAnzWuerfe() >= 10) {
+        surface.setTitle("Ziel_15: Erneut spielen?");
+        gewonnen();
+      } else {
+        surface.setTitle("Ziel_15: aktives_Online_Match");
+        akSpieler.get(spieler).spieleRunde();
+      }
+    }
+    refresh();
+  }
+
+  // --- Logik-Methoden ---
+
   protected void init() {
     uim.buttons.get(1).caninteract = false;
     programmstart = 60 * 3 + 1;
-    meldeDialog("Angemeldet als client: " + myId);
+    meldeDialog("Angemeldet als Spieler: " + (myId + 2));
+    meldeDialog("Dein Name: " + uim.buttons.get(6).text);
+    akSpieler.add(new OnlineSpielerSender(uim.buttons.get(6).text));
     meldeDialog("------------------------------------");
     surface.setTitle("Ziel_15: Online_Match");
-    meldeDialog("Server sagt start");
-  }
-
-
-  public void spielAblauf() {
-    //clientRefresh(client);
-    if (programmstart == 60 * 3) {
-      init();
-      programmstart++;
-    } else {
-      if (keyPressed) {
-        if (mode == 0) {
-          setupSpieleranzahl();
-        } else if (j < Integer.valueOf(input) && mode == 1) {
-          setupName();
-        } else if (mode == 2) {
-          setupZn();
-        }
-      }
-      if (mode >= 3) {
-        if (akSpieler.size() > 0 && akSpieler.get(akSpieler.size() - 1).getAnzWuerfe() >= 10) {
-          surface.setTitle("Ziel_15: Erneut spielen?");
-          gewonnen();
-        } else {
-          surface.setTitle("Ziel_15: Aktives Spiel");
-          if (keyPressed && akSpieler.get(spieler).getGZN()) {
-            setZn();
-          }
-          akSpieler.get(spieler).spieleRunde();
-        }
-      }
-      refresh();
-    }
+    mode = 3;
   }
 }
