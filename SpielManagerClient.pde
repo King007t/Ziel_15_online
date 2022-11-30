@@ -65,8 +65,11 @@ public class SpielManagerClient extends SpielManager {
         manager.j = 0;
         return;
       }
-      if (myId == int(packet[1]))
+      if (myId == int(packet[1])) {
         client.stop();
+        reset();
+        programmstart = 0;
+      }
       else if (myId > int(packet[1]))
         myId--;
       break;
