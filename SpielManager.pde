@@ -6,10 +6,17 @@ public class SpielManager {
   protected int mode = 0;
   protected int j = 0;
   protected int input3;
+  public int aktWurfBuffer = 0;
+  public int valBuffer = 0;
   public StringList console = new StringList();
   public ArrayList<Spieler> akSpieler = new ArrayList<Spieler>();
   protected Server server;
   protected Client client;
+  
+  public int myId = -1;
+  public IntList list = new IntList();
+  public ArrayList<Client> clientMap = new ArrayList<>();
+  public ArrayList<String> names = new ArrayList<>();
 
   // Bestimmt wer einen gezinkten Wuerfel erhält.
   private String cheaterName = "schwindler";
@@ -308,5 +315,8 @@ public class SpielManager {
   }
   
   public void sendPacket(int... packet) {
+  }
+  
+  public void clientRefresh() {
   }
 }

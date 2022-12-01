@@ -1,7 +1,5 @@
 public class SpielManagerHost extends SpielManager {
 
-  public ArrayList<Client> clientMap = new ArrayList<>();
-  public ArrayList<String> names = new ArrayList<>();
   // --- Konstruktoren ---
 
   public SpielManagerHost() {
@@ -51,6 +49,21 @@ public class SpielManagerHost extends SpielManager {
         isConnected = false;
       sendPacket(2, packet[1]);
       break;
+      case(3): // check if all clients succesfully recieved packet
+      boolean listcontains = false;
+      for (int i : list) {
+        if (list.get(i) == (int) packet[1]) {
+          listcontains = true;
+          break;
+        }
+      }
+      if (!listcontains)
+        list.append((int) packet[1]);
+      break;
+      case(4): // sync midgame
+      valBuffer = packet[2];
+      sendPacket(4, 2, packet[1] , packet[2]);
+      break;
     }
   }
 
@@ -71,13 +84,18 @@ public class SpielManagerHost extends SpielManager {
   // --- Spielablauf-Methode ---
 
   public void spielAblauf() {
-    if (mode >= 3) {
+    if (programmstart == 60 * 3) {
+      init();
+      programmstart++;
+    } else if (mode >= 3) {
       if (akSpieler.size() > 0 && akSpieler.get(akSpieler.size() - 1).getAnzWuerfe() >= 10) {
         surface.setTitle("Ziel_15: Erneut spielen?");
         gewonnen();
       } else {
         surface.setTitle("Ziel_15: aktives_Online_Match");
         akSpieler.get(spieler).spieleRunde();
+        valBuffer = 0;
+        //aktWurfBuffer = 0;
       }
     }
     refresh();
@@ -86,13 +104,58 @@ public class SpielManagerHost extends SpielManager {
   // --- Logik-Methoden ---
 
   protected void init() {
-    sendPacket(1);
+
     surface.setTitle("Ziel_15: pre_Online_Match");
     akSpieler.add(new OnlineSpielerHost(uim.buttons.get(6).text));
+    String name = uim.buttons.get(6).text;
+    char[] nameChars = name.toCharArray();
+    byte[] addPacket = new byte[13];
+    addPacket[0] = 3;
+    addPacket[1] = -1;
+    for (int i = 2; i < addPacket.length; i++) {
+      if (i-2>= nameChars.length) {
+        addPacket[i] = -1;
+        break;
+      }
+      addPacket[i] = byte(nameChars[i-2]);
+    }
+    server.write(addPacket);
+    boolean accepted = false;
+    while (!accepted) {
+      serverRefresh();
+      if (list.size() == clientMap.size()) {
+        accepted = true;
+        list.clear();
+      }
+    }
     for (Client client : clientMap) {
       akSpieler.add(new OnlineSpielerReciever(names.get(clientMap.indexOf(client)), clientMap.indexOf(client)));
-      akSpieler.get(akSpieler.size() - 1).anmelden(this);
+      String name2 = names.get(clientMap.indexOf(client));
+      char[] nameChars2 = name2.toCharArray();
+      byte[] addPacket2 = new byte[13];
+      addPacket2[0] = 3;
+      addPacket2[1] = (byte) clientMap.indexOf(client);
+
+      for (int i = 2; i < addPacket2.length; i++) {
+        if (i-2 >= nameChars2.length ) {
+          addPacket2[i] = -1;
+          break;
+        }
+
+        addPacket2[i] = byte(nameChars2[i-2]);
+      }
+
+      server.write(addPacket2);
+      boolean accepted2 = false;
+      while (!accepted2) {
+        serverRefresh();
+        if (list.size() == clientMap.size()) {
+          accepted2 = true;
+          list.clear();
+        }
+      }
     }
+    sendPacket(1);
     meldeDialog("Angemeldet als Spieler: 1");
     meldeDialog("Dein Name: " + uim.buttons.get(6).text);
     meldeDialog("------------------------------------");
@@ -100,5 +163,34 @@ public class SpielManagerHost extends SpielManager {
     meldeDialog("------------------------------------");
     meldeDialog("Spieler " + (spieler + 1) + ": " + akSpieler.get(spieler).name + " ist am Zug");
     mode = 3;
+  }
+  
+  public void gewonnen() {
+    if (mode == 3) {
+      mode++;
+      meldeDialog("------------------------------------");
+      meldeDialog("SPIEL ENDE:");
+      meldeDialog("------------------------------------");
+      Spieler gewinner = getWinner();
+      if (gewinner == null) {
+        meldeDialog("Unentschieden");
+      } else {
+        meldeDialog(gewinner.getName() + " hat gewonnen.");
+        meldeDialog(gewinner.gibDaten());
+      }
+      meldeDialog("------------------------------------");
+      meldeDialog("Noch ein mal? JA(j) oder Nein(n)");
+    }
+    int dialog = dialog();
+    if (dialog == 1) {
+      sendPacket(5, 1);
+      reset();
+      init();
+    }
+    if (dialog == 2) {
+      sendPacket(5, 2);
+      surface.setTitle("Ziel_15: Spiel wird beendet");
+      exit();
+    }
   }
 }

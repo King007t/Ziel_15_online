@@ -14,7 +14,6 @@ public class Spieler {
   protected boolean bereitsGewuerfelt;
   protected boolean hideMessage;
   protected Wuerfel wuerfel;
-  protected SpielManager manager;
 
   // --- Konstruktoren ---
 
@@ -90,10 +89,7 @@ public class Spieler {
   public void setAugenzahl(int augenzahl) {
     wuerfel.setAugenzahl(augenzahl);
   }
-  
-  public void anmelden(SpielManager manager) {
-    this.manager = manager;
-  }
+
 
   // --- Spiel-Methoden ---
 
