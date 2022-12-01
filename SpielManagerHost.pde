@@ -7,6 +7,13 @@ public class SpielManagerHost extends SpielManager {
     server = new Server(Ziel_15.this, 5204);
   }
 
+  // --- Reset-Methode ---
+
+  public void reset() {
+    spieler = 0;
+    mode = 3;
+  }
+
   // --- Server-Methode ---
 
   public void serverRefresh() {

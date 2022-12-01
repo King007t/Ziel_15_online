@@ -1,6 +1,13 @@
 public class SpielManagerClient extends SpielManager {
 
   Spieler onlineSpieler;
+  
+  // --- Reset-Methode ---
+
+  public void reset() {
+    spieler = 0;
+    mode = 3;
+  }
 
   // --- Konstruktoren ---
 
@@ -135,6 +142,8 @@ public class SpielManagerClient extends SpielManager {
     programmstart = 60 * 3 + 1;
     meldeDialog("Angemeldet als Spieler: " + (myId + 2));
     meldeDialog("Dein Name: " + uim.buttons.get(6).text);
+    meldeDialog("------------------------------------");
+     meldeDialog("ONLINE SPIEL START:");
     meldeDialog("------------------------------------");
     meldeDialog("Spieler " + (spieler + 1) + ": " + akSpieler.get(spieler).name + " ist am Zug");
     surface.setTitle("Ziel_15: Online_Match");
