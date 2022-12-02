@@ -1,12 +1,15 @@
 public class SpielManagerClient extends SpielManager {
 
   Spieler onlineSpieler;
-  
+
   // --- Reset-Methode ---
 
   public void reset() {
     spieler = 0;
     mode = 3;
+    programmstart = 60 * 3;
+    console.clear();
+    akSpieler.clear();
   }
 
   // --- Konstruktoren ---
@@ -86,7 +89,9 @@ public class SpielManagerClient extends SpielManager {
           break;
         name += char(packet[i]);
       }
-      akSpieler.add(packet[1] == myId ? new OnlineSpielerSender(name) : new OnlineSpielerReciever(name, packet[1]));
+      Spieler s = packet[1] == myId ? new OnlineSpielerSender(name) : new OnlineSpielerReciever(name, packet[1]); 
+      println("packet 1: "+ packet[1] + "myId: " + myId + "constructor: " + s);
+      akSpieler.add(s);
       sendPacket(3, myId);
       break;
       case(4): //sync midgame
@@ -103,7 +108,6 @@ public class SpielManagerClient extends SpielManager {
       case(5): //restart or exit
       if (packet[1] == 1) {
         reset();
-        init();
       }
       if (packet[1] == 2) {
         surface.setTitle("Ziel_15: Spiel wird beendet");
@@ -135,15 +139,16 @@ public class SpielManagerClient extends SpielManager {
   // --- Logik-Methoden ---
 
   protected void init() {
-    for (int i = 0; i < akSpieler.size(); i++) {
+    /*for (int i = 0; i < akSpieler.size(); i++) {
       println(akSpieler.get(i));
     }
+    println(myId);*/
     uim.buttons.get(1).caninteract = false;
     programmstart = 60 * 3 + 1;
     meldeDialog("Angemeldet als Spieler: " + (myId + 2));
     meldeDialog("Dein Name: " + uim.buttons.get(6).text);
     meldeDialog("------------------------------------");
-     meldeDialog("ONLINE SPIEL START:");
+    meldeDialog("ONLINE SPIEL START:");
     meldeDialog("------------------------------------");
     meldeDialog("Spieler " + (spieler + 1) + ": " + akSpieler.get(spieler).name + " ist am Zug");
     surface.setTitle("Ziel_15: Online_Match");

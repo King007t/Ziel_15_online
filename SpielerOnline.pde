@@ -41,10 +41,11 @@ public class OnlineSpielerReciever extends Spieler {
         boolean accepted = false;
         while (!accepted) {
           manager.sendPacket(4, 1, aktWurf);
-          if (manager.list.size() == manager.clientMap.size()) {
+          if (manager.list.size() > 0) {
             accepted = true;
             manager.list.clear();
           }
+          delay(10);
         }
       } else if (manager instanceof SpielManagerClient) {
         boolean accepted = false;
@@ -58,6 +59,7 @@ public class OnlineSpielerReciever extends Spieler {
             bereitsGewuerfelt = true;
             accepted = true;
           }
+          delay(10);
         }
       }
     }
@@ -115,6 +117,7 @@ public class OnlineSpielerSender extends Spieler {
           bereitsGewuerfelt = true;
           accepted = true;
         }
+        delay(10);
       }
     }
   }
@@ -167,10 +170,11 @@ public class OnlineSpielerHost extends Spieler {
         manager.serverRefresh();
         println("while");
         manager.sendPacket(4, 1, aktWurf);
-        if (manager.list.size() == manager.clientMap.size()) {
+        if (manager.list.size() > 0) {
           accepted = true;
           manager.list.clear();
         }
+        delay(10);
       }
     }
   }

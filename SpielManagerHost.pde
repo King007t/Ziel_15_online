@@ -12,6 +12,9 @@ public class SpielManagerHost extends SpielManager {
   public void reset() {
     spieler = 0;
     mode = 3;
+    programmstart = 60 * 3;
+    console.clear();
+    akSpieler.clear();
   }
 
   // --- Server-Methode ---
@@ -57,19 +60,12 @@ public class SpielManagerHost extends SpielManager {
       sendPacket(2, packet[1]);
       break;
       case(3): // check if all clients succesfully recieved packet
-      boolean listcontains = false;
-      for (int i : list) {
-        if (list.get(i) == (int) packet[1]) {
-          listcontains = true;
-          break;
-        }
-      }
-      if (!listcontains)
+      if (!list.hasValue((int) packet[1]))
         list.append((int) packet[1]);
       break;
       case(4): // sync midgame
       valBuffer = packet[2];
-      sendPacket(4, 2, packet[1] , packet[2]);
+      sendPacket(4, 2, packet[1], packet[2]);
       break;
     }
   }
@@ -111,7 +107,7 @@ public class SpielManagerHost extends SpielManager {
   // --- Logik-Methoden ---
 
   protected void init() {
-
+    delay(1000);
     surface.setTitle("Ziel_15: pre_Online_Match");
     akSpieler.add(new OnlineSpielerHost(uim.buttons.get(6).text));
     String name = uim.buttons.get(6).text;
@@ -127,39 +123,43 @@ public class SpielManagerHost extends SpielManager {
       addPacket[i] = byte(nameChars[i-2]);
     }
     server.write(addPacket);
+    delay(100);
     boolean accepted = false;
     while (!accepted) {
+      println("while");
       serverRefresh();
-      if (list.size() == clientMap.size()) {
+      if (list.size() > 0) {
         accepted = true;
         list.clear();
       }
+      delay(10);
     }
-    for (Client client : clientMap) {
-      akSpieler.add(new OnlineSpielerReciever(names.get(clientMap.indexOf(client)), clientMap.indexOf(client)));
-      String name2 = names.get(clientMap.indexOf(client));
+    for (int i = 0; i < clientMap.size(); i++) {
+      akSpieler.add(new OnlineSpielerReciever(names.get(i), i));
+      String name2 = names.get(i);
       char[] nameChars2 = name2.toCharArray();
       byte[] addPacket2 = new byte[13];
       addPacket2[0] = 3;
-      addPacket2[1] = (byte) clientMap.indexOf(client);
-
-      for (int i = 2; i < addPacket2.length; i++) {
-        if (i-2 >= nameChars2.length ) {
-          addPacket2[i] = -1;
+      addPacket2[1] = (byte) i;
+      for (int j = 2; j < addPacket2.length; j++) {
+        if (j-2 >= nameChars2.length ) {
+          addPacket2[j] = -1;
           break;
         }
 
-        addPacket2[i] = byte(nameChars2[i-2]);
+        addPacket2[j] = byte(nameChars2[j-2]);
       }
-
       server.write(addPacket2);
+      delay(100);
       boolean accepted2 = false;
       while (!accepted2) {
+        println("while2");
         serverRefresh();
-        if (list.size() == clientMap.size()) {
+        if (list.size() > 0) {
           accepted2 = true;
           list.clear();
         }
+        delay(10);
       }
     }
     sendPacket(1);
@@ -171,7 +171,7 @@ public class SpielManagerHost extends SpielManager {
     meldeDialog("Spieler " + (spieler + 1) + ": " + akSpieler.get(spieler).name + " ist am Zug");
     mode = 3;
   }
-  
+
   public void gewonnen() {
     if (mode == 3) {
       mode++;
@@ -191,6 +191,7 @@ public class SpielManagerHost extends SpielManager {
     int dialog = dialog();
     if (dialog == 1) {
       sendPacket(5, 1);
+      delay(100);
       reset();
       init();
     }
