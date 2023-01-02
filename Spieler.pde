@@ -123,12 +123,12 @@ public class Spieler {
     if (istFertig()) {
       meldeDialog("Du hast bereits 6 Wuerfe gewertet");
       meldeDialog(gibDaten());
-      delay(1000);
+      delay(10000);
       return 3;
     } else if ((11 - anzWuerfe) <= (6 - anzGewertet)) {
       meldeDialog("Da erst " + anzGewertet + " von 6 Wuerfen gewertet wurden und du noch " + (10 - anzWuerfe) + " von 10 übrig"  );
       meldeDialog("hast, wird der Wurf gewertet.");
-      delay(1000);
+      delay(10000);
       return 1;
     } else {
       return pruefe();

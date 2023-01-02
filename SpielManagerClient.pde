@@ -6,7 +6,7 @@ public class SpielManagerClient extends SpielManager {
 
   public void reset() {
     spieler = 0;
-    mode = 3;
+    mode = 0;
     programmstart = 60 * 3;
     console.clear();
     akSpieler.clear();
@@ -89,7 +89,7 @@ public class SpielManagerClient extends SpielManager {
           break;
         name += char(packet[i]);
       }
-      Spieler s = packet[1] == myId ? new OnlineSpielerSender(name) : new OnlineSpielerReciever(name, packet[1]); 
+      Spieler s = packet[1] == myId ? new OnlineSpielerSender(name) : new OnlineSpielerReciever(name, packet[1]);
       println("packet 1: "+ packet[1] + "myId: " + myId + "constructor: " + s);
       akSpieler.add(s);
       sendPacket(3, myId);
@@ -140,9 +140,9 @@ public class SpielManagerClient extends SpielManager {
 
   protected void init() {
     /*for (int i = 0; i < akSpieler.size(); i++) {
-      println(akSpieler.get(i));
-    }
-    println(myId);*/
+     println(akSpieler.get(i));
+     }
+     println(myId);*/
     uim.buttons.get(1).caninteract = false;
     programmstart = 60 * 3 + 1;
     meldeDialog("Angemeldet als Spieler: " + (myId + 2));

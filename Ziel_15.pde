@@ -285,6 +285,8 @@ public void joinMenu() {
   if ((jointext == "Das Spiel läuft bereits" || jointext == "Verbindung zum Host verloren")&& manager.j == 60 * 3) {
     manager.client.stop();
     manager.reset();
+    uim.buttons.get(0).caninteract = true;
+    uim.buttons.get(1).caninteract = false;
     uim.buttons.get(2).reset();
     uim.buttons.get(6).reset();
     programmstart = 0;
