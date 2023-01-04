@@ -275,7 +275,6 @@ public void joinMenu() {
     } else
       text(jointext, 100, 50, width - 2 * 100, height - 2 * 150);
   if ((jointext == "Das Spiel läuft bereits" || jointext == "Die Lobby ist voll" || jointext == "Verbindung zum Host verloren")&& manager.j == 60 * 3) {
-    manager.client.stop();
     manager.reset();
     uim.buttons.get(0).caninteract = true;
     uim.buttons.get(1).caninteract = false;

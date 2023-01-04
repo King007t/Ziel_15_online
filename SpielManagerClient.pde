@@ -63,8 +63,8 @@ public class SpielManagerClient extends SpielManager {
             jointext = "Die Lobby ist voll";
           else 
             jointext = "Das Spiel läuft bereits";
-          manager.j = 0;
-          disconnect();
+          j = 0;
+          client.stop();
           return;
         }
       }
@@ -76,7 +76,7 @@ public class SpielManagerClient extends SpielManager {
       println((int)packet[1]);
       if ((int) packet[1] == -1) {
         jointext = "Verbindung zum Host verloren";
-        manager.j = 0;
+        j = 0;
         return;
       }
       if (myId == int(packet[1])) {
