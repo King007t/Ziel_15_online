@@ -36,8 +36,12 @@ public class SpielManagerHost extends SpielManager {
     println(packet);
     switch(packet[0]) {
       case(0): //handshake
-      if (programmstart == 60 * 3 + 1) {
+      if (programmstart == 60 * 3 + 1) { //spiel hat bereits gestartet
         sendPacket(0, -1);
+        return;
+      }
+      if (clientMap.size() >= 3) { //lobby voll
+        sendPacket(0, -1, 1);
         return;
       }
       String name = "";

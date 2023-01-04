@@ -170,7 +170,7 @@ public class OnlineSpielerHost extends Spieler {
       boolean accepted = false;
       while (!accepted) {
         manager.serverRefresh();
-        println("while");
+        println("whilecock");
         manager.sendPacket(4, 1, aktWurf);
         if (manager.list.size() > 0) {
           accepted = true;
