@@ -1,13 +1,5 @@
 import processing.net.*;
 
-/**
- =================================
- |                               |
- |      Nick's Networking        |
- |                               |
- =================================
- **/
-
 // --- Attribute (Objektvariablen) ---
 
 public boolean isConnected = false;
@@ -289,6 +281,7 @@ public void joinMenu() {
     uim.buttons.get(1).caninteract = false;
     uim.buttons.get(2).reset();
     uim.buttons.get(6).reset();
+    gamemode(0, null);
     programmstart = 0;
   }
   textSize(20);
