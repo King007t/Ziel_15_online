@@ -193,7 +193,6 @@ public class SpielManagerHost extends SpielManager {
       sendPacket(5, 1);
       delay(100);
       reset();
-      init();
     }
     if (dialog == 2) {
       sendPacket(5, 2);

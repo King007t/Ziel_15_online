@@ -40,6 +40,8 @@ public class OnlineSpielerReciever extends Spieler {
         bereitsGewuerfelt = true;
         boolean accepted = false;
         while (!accepted) {
+          manager.serverRefresh();
+          println("while");
           manager.sendPacket(4, 1, aktWurf);
           if (manager.list.size() > 0) {
             accepted = true;
