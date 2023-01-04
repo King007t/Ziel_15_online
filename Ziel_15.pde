@@ -256,7 +256,7 @@ public void joinMenu() {
   textAlign(CENTER, CENTER);
   fill(0);
   textSize(30);
-  if (jointext == "Das Spiel läuft bereits" || jointext == "Verbindung zum Host verloren") {
+  if (jointext == "Das Spiel läuft bereits" || jointext == "Die Lobby ist voll" || jointext == "Verbindung zum Host verloren") {
     text(jointext, 100, 35, width - 2 * 100, height - 2 * 150);
     textSize(20);
     text("Zurück zum Menü in " + (3 - (manager.j / 60)), 100, 75, width - 2 * 100, height - 2 * 150);
@@ -274,7 +274,7 @@ public void joinMenu() {
       manager.j++;
     } else
       text(jointext, 100, 50, width - 2 * 100, height - 2 * 150);
-  if ((jointext == "Das Spiel läuft bereits" || jointext == "Verbindung zum Host verloren")&& manager.j == 60 * 3) {
+  if ((jointext == "Das Spiel läuft bereits" || jointext == "Die Lobby ist voll" || jointext == "Verbindung zum Host verloren")&& manager.j == 60 * 3) {
     manager.client.stop();
     manager.reset();
     uim.buttons.get(0).caninteract = true;

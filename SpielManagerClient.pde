@@ -59,8 +59,12 @@ public class SpielManagerClient extends SpielManager {
       if (myId == -1) {
         myId = (int)packet[1];
         if (myId == -1) {
-          jointext = "Das Spiel läuft bereits";
+          if (packet[2] == 1)
+            jointext = "Die Lobby ist voll";
+          else 
+            jointext = "Das Spiel läuft bereits";
           manager.j = 0;
+          disconnect();
           return;
         }
       }
