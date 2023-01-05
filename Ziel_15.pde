@@ -41,6 +41,14 @@ void setup() {
   uim.buttons.get(5).caninteract = false;
   uim.register(new TextBoxButton(170, 65, 250, 50, "Enter Name", 20));
   uim.buttons.get(6).caninteract = false;
+  uim.register(new NeinButton(50, 400, 150, 50, "Nein", 20));
+  uim.buttons.get(7).caninteract = false;
+  uim.register(new WertenButton(400, 400, 150, 50, "Werten", 20));
+  uim.buttons.get(8).caninteract = false;
+  uim.register(new ChatBoxButton(50, 320, 440, 50, "Enter to Chat", 20));
+  uim.buttons.get(9).caninteract = false;
+  uim.register(new SendButton(500, 320));
+  uim.buttons.get(10).caninteract = false;
 }
 
 // --- Draw ---
@@ -262,11 +270,11 @@ public void joinMenu() {
     text("Zurück zum Menü in " + (3 - (manager.j / 60)), 100, 75, width - 2 * 100, height - 2 * 150);
     manager.j++;
   } else
-    if (manager.client.active() == false) { 
+    if (manager.client.active() == false) {
       text("Verbindung Fehlgeschlagen", 100, 35, width - 2 * 100, height - 2 * 150);
       textSize(20);
       text("Erneuter Versuch in " + (3 - (manager.j / 60)), 100, 75, width - 2 * 100, height - 2 * 150);
-      
+
       if (manager.j == 60 * 3) {
         manager.j = 0;
         gamemode(2, uim.buttons.get(2).text);
@@ -413,22 +421,38 @@ void confirmOther(String text) {
   }
 }
 
-public void meldeDialog(String meldungstext) {
-  if (manager.console.size() >= (height - 20) / 20) {
+public void meldeChat(String meldungstext) {
+  if (manager.console.size() >= (100 - 20) / 20) {
     manager.console.remove(0);
   }
   manager.console.append(meldungstext);
-  backgroundImage();
   for (int i = 0; i < manager.console.size(); i++) {
     fill(#000000);
-    text(manager.console.get(i), 20, 20 + 20 * i);
+    text(manager.console.get(i), 60, 235 + 20 * i);
   }
 }
 
+public void meldeDialog(String meldungstext) {
+  manager.mconsole = meldungstext;
+}
+
+public void meldeDaten(String meldungstext) {
+  manager.dconsole = meldungstext;
+}
+
 public void refresh() {
-  backgroundImage();
+  manager.ingame();
   for (int i = 0; i < manager.console.size(); i++) {
     fill(#000000);
-    text(manager.console.get(i), 20, 20 + 20 * i);
+    text(manager.console.get(i), 60, 235 + 20 * i);
   }
+}
+
+void confirmMessage() {
+  manager.sendChat();
+  uim.buttons.get(9).show = false;
+  uim.buttons.get(9).textlocked = true;
+  uim.buttons.get(9).text = "Enter to Chat";
+  inventory2.clear();
+  delay(100);
 }

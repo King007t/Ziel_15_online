@@ -12,18 +12,17 @@ public class OnlineSpielerReciever extends Spieler {
   // Empfaengt von einem Client
   public int pruefe() {
     if (!hideMessage) {
+      meldeDaten(gibDaten());
       meldeDialog("Soll die eben geworfene " + aktWurf + " gewertet werden? Warte auf " + name + ".");
       hideMessage = true;
     }
     int val = manager.valBuffer;
     manager.valBuffer = 0;
-    if (val == 1) {
-      meldeDialog("gewertet");
+    if (val == 1) {      
       hideMessage = false;
       delay(1000);
     }
     if (val == 2) {
-      meldeDialog("nicht gewertet");
       hideMessage = false;
       delay(1000);
     }
@@ -80,28 +79,20 @@ public class OnlineSpielerSender extends Spieler {
   public int pruefe() {
     println("prüfer aktiv");
     if (!hideMessage) {
-      meldeDialog("Soll die eben geworfene " + aktWurf + " gewertet werden? JA(j) oder NEIN(n)? ");
+      uim.buttons.get(7).caninteract = true;
+      uim.buttons.get(8).caninteract = true;
+      meldeDaten(gibDaten());
+      meldeDialog("Soll die eben geworfene " + aktWurf + " gewertet werden? JA oder NEIN? ");
       hideMessage = true;
     }
     int val = 0;
-    if (keyPressed) {
-      println("keypressed");
-      if (key == 'j') {
-        meldeDialog("gewertet");
-        val = 1;
-        manager.sendPacket(4, manager.myId, val);
-        hideMessage = false;
-        delay(1000);
-      }
-      if (key == 'n') {
-        meldeDialog("nicht gewertet");
-        val = 2;
-        manager.sendPacket(4, manager.myId, val);
-        hideMessage = false;
-        delay(1000);
-      }
+    if (manager.werten >= 1) {
+      val = manager.werten;
+      manager.werten = 0;
+      manager.sendPacket(4, manager.myId, val);
+      hideMessage = false;
+      delay(1000);
     }
-    println("return " + val);
     return val;
   }
 
@@ -137,28 +128,23 @@ public class OnlineSpielerHost extends Spieler {
   // Sendet an den Server
   public int pruefe() {
     if (!hideMessage) {
-      meldeDialog("Soll die eben geworfene " + aktWurf + " gewertet werden? JA(j) oder NEIN(n)? ");
+      uim.buttons.get(7).caninteract = true;
+      uim.buttons.get(8).caninteract = true;
+      meldeDaten(gibDaten());
+      meldeDialog("Soll die eben geworfene " + aktWurf + " gewertet werden? JA oder NEIN? ");
       hideMessage = true;
     }
     int val = 0;
-    if (keyPressed) {
-      if (key == 'j') {
-        meldeDialog("gewertet");
-        val = 1;
-        manager.sendPacket(4, 2, manager.myId, val);
-        hideMessage = false;
-        delay(1000);
-      }
-      if (key == 'n') {
-        meldeDialog("nicht gewertet");
-        val = 2;
-        manager.sendPacket(4, 2, manager.myId, val);
-        hideMessage = false;
-        delay(1000);
-      }
+    if (manager.werten >= 1) {
+      val = manager.werten;
+      manager.werten = 0;
+      manager.sendPacket(4, 2, manager.myId, val);
+      hideMessage = false;
+      delay(1000);
     }
     return val;
   }
+
 
   // Wuerfeln, Wurfergebnis in aktWurf speichern.
   public void wuerfeln() {

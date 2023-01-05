@@ -8,11 +8,14 @@ public class SpielManager {
   protected int input3;
   public int aktWurfBuffer = 0;
   public int valBuffer = 0;
+  public int werten = 0;
   public StringList console = new StringList();
   public ArrayList<Spieler> akSpieler = new ArrayList<Spieler>();
+  public String mconsole = "fetching...";
+  public String dconsole = "fetching...";
   protected Server server;
   protected Client client;
-  
+
   public int myId = -1;
   public IntList list = new IntList();
   public ArrayList<Client> clientMap = new ArrayList<>();
@@ -86,6 +89,14 @@ public class SpielManager {
 
   public void addtoSpieler(int val) {
     spieler = spieler + val;
+  }
+
+  // --- Chat-Methode ---
+
+  void sendChat() {
+    if (uim.buttons.get(9).text == "Enter to Chat" || uim.buttons.get(9).text == "|")
+      return;
+    sendChat(uim.buttons.get(6).text + ": " + uim.buttons.get(9).text);
   }
 
   // --- Spielablauf-Methode ---
@@ -308,15 +319,98 @@ public class SpielManager {
     }
     return val;
   }
+
+  public void enterChat() {
+    if (uim.buttons.get(9).show == true) {
+      if (keyPressed) {
+        if (key == BACKSPACE) {
+          if (inventory2.size() != 0) {
+            inventory2.remove(inventory2.size() - 1);
+            //print
+            if (inventory2.size() == 0) {
+              input2 = "|";
+            } else {
+              input2 = inventory2.get(0);
+              for (int i = 1; i < inventory2.size(); i++) {
+                input2 += inventory2.get(i);
+              }
+            }
+            uim.buttons.get(9).setText(input2);
+            delay(100);
+          }
+        } else if ((key == 'a' || key == 'b' || key == 'c' || key == 'd' || key == 'e' || key == 'f' || key == 'g' || key == 'h' || key == 'i' || key == 'j' || key == 'k' || key == 'l' || key == 'm' || key == 'n' || key == 'o' || key == 'p' || key == 'q' || key == 'r' || key == 's' || key == 't' || key == 'u' || key == 'v' || key == 'w' || key == 'x' || key == 'y' || key == 'z' || key == ' ') &&  inventory2.size() < 10) {
+          inventory2.append(str(key));
+          //print
+          input2 = inventory2.get(0);
+          for (int i = 1; i < inventory2.size(); i++) {
+            input2 += inventory2.get(i);
+          }
+          uim.buttons.get(9).setText(input2);
+          delay(100);
+        }
+      }
+    }
+  }
+  
+  // --- Grafik-Methoden ---
+
+  public void ingame() {
+    uim.buttons.get(9).caninteract = true;
+    uim.buttons.get(10).caninteract = true;
+    textSize(20);
+    background(#98DDFF);
+    fill(#F5D100);
+    rect(50, 50, 330, 150);
+    rect(390, 50, 160, 150);
+    rect(50, 210, 500, 100);
+    //fake Werten
+    stroke(#FFFFFF);
+    strokeWeight(5);
+    fill(190);
+    rect(400, 400, 150, 50);
+    fill(0);
+    textAlign(CENTER, CENTER);
+    text("Werten", 400, 400, 150, 50);
+    fill(#F5D100);
+    //
+    //fake Nein
+    stroke(#FFFFFF);
+    strokeWeight(5);
+    fill(190);
+    rect(50, 400, 150, 50);
+    fill(0);
+    textAlign(CENTER, CENTER);
+    text("Nein", 50, 400, 150, 50);
+    fill(#F5D100);
+    //
+    fill(0);
+    textSize(20);
+    uim.buttons.get(5).caninteract = false;
+    text(mconsole, 50, 50, 330, 150);
+    text(dconsole, 390, 50, 160, 150);
+    textAlign(LEFT, TOP);
+    text("Spieler: " + (myId + 2), 10, 10);
+    textAlign(RIGHT, TOP);
+    text("Name: " + uim.buttons.get(6).text, width - 10, 10);
+    textAlign(CENTER, TOP);
+    text("Am Zug: " + (akSpieler.size() > 0 ? akSpieler.get(spieler).name : "fetching..."), 300, 10);
+    fill(#F5D100);
+    textAlign(TOP, LEFT);
+    enterChat();
+  }
+
   // --- wish abstract ---
   public void handlePacket(byte[] packet) {
   }
   public void serverRefresh() {
   }
-  
+
   public void sendPacket(int... packet) {
   }
-  
+
   public void clientRefresh() {
+  }
+  
+  public void sendChat(String message) {
   }
 }

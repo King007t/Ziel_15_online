@@ -13,6 +13,9 @@ public class SpielManagerHost extends SpielManager {
     spieler = 0;
     mode = 3;
     programmstart = 60 * 3;
+    werten = 0;
+    mconsole = "fetching...";
+    dconsole = "fetching...";
     console.clear();
     akSpieler.clear();
   }
@@ -21,7 +24,7 @@ public class SpielManagerHost extends SpielManager {
 
   public void serverRefresh() {
     if (server.available() != null) {
-      byte[] byteBuffer = new byte[20];
+      byte[] byteBuffer =  new byte[23];
       int byteCount = server.available().readBytes(byteBuffer);
       if (byteCount > 0)
         handlePacket(server.available(), byteBuffer);
@@ -29,15 +32,13 @@ public class SpielManagerHost extends SpielManager {
   }
 
   public void handlePacket(Client sender, byte[] packet) {
-
     if (!clientMap.contains(sender) && packet[0] != 0)
       return;
-
     println(packet);
     switch(packet[0]) {
       case(0): //handshake
       if (programmstart == 60 * 3 + 1) { //spiel hat bereits gestartet
-        sendPacket(0, -1);
+        sendPacket(0, -1, 0);
         return;
       }
       if (clientMap.size() >= 3) { //lobby voll
@@ -71,6 +72,15 @@ public class SpielManagerHost extends SpielManager {
       valBuffer = packet[2];
       sendPacket(4, 2, packet[1], packet[2]);
       break;
+      case(6): // chat
+      String message = "";
+      for (int i = 1; i < packet.length; i++) {
+        if (packet[i] == -1)
+          break;
+        message += char(packet[i]);
+      }
+      sendChat(message);
+      break;
     }
   }
 
@@ -86,6 +96,24 @@ public class SpielManagerHost extends SpielManager {
     sendPacket(2, -1);
     server.stop();
     isConnected = false;
+  }
+
+  // --- Chat-Methoden ---
+
+  void sendChat(String message) {
+    meldeChat(message);
+    byte[] messagePacket = new byte[23];
+    messagePacket[0] = 6;
+    String name = message;
+    char[] nameChars = name.toCharArray();
+    for (int i = 1; i < messagePacket.length; i++) {
+      if (i-1 >= nameChars.length) {
+        messagePacket[i] = -1;
+        break;
+      }
+      messagePacket[i] = byte(nameChars[i-1]);
+    }
+    server.write(messagePacket);
   }
 
   // --- Spielablauf-Methode ---
@@ -167,33 +195,29 @@ public class SpielManagerHost extends SpielManager {
       }
     }
     sendPacket(1);
-    meldeDialog("Angemeldet als Spieler: 1");
-    meldeDialog("Dein Name: " + uim.buttons.get(6).text);
-    meldeDialog("------------------------------------");
-    meldeDialog("ONLINE SPIEL START:");
-    meldeDialog("------------------------------------");
-    meldeDialog("Spieler " + (spieler + 1) + ": " + akSpieler.get(spieler).name + " ist am Zug");
     mode = 3;
   }
 
   public void gewonnen() {
     if (mode == 3) {
       mode++;
-      meldeDialog("------------------------------------");
-      meldeDialog("SPIEL ENDE:");
-      meldeDialog("------------------------------------");
       Spieler gewinner = getWinner();
       if (gewinner == null) {
-        meldeDialog("Unentschieden");
+        meldeDaten("Unentschieden");
       } else {
-        meldeDialog(gewinner.getName() + " hat gewonnen.");
-        meldeDialog(gewinner.gibDaten());
+        meldeDaten("Winner:\n" + gewinner.getName());
+        //meldeDialog(gewinner.gibDaten());
       }
-      meldeDialog("------------------------------------");
-      meldeDialog("Noch ein mal? JA(j) oder Nein(n)");
+      meldeDialog("Noch ein mal? JA oder Nein");
     }
-    int dialog = dialog();
+    uim.buttons.get(7).caninteract = true;
+    uim.buttons.get(8).caninteract = true;
+    uim.buttons.get(8).text = "Ja";
+    int dialog = werten;
     if (dialog == 1) {
+      uim.buttons.get(8).text = "Werten";
+      uim.buttons.get(7).caninteract = false;
+      uim.buttons.get(8).caninteract = false;
       sendPacket(5, 1);
       delay(100);
       reset();

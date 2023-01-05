@@ -8,6 +8,9 @@ public class SpielManagerClient extends SpielManager {
     spieler = 0;
     mode = 0;
     programmstart = 60 * 3;
+    werten = 0;
+    mconsole = "fetching...";
+    dconsole = "fetching...";
     console.clear();
     akSpieler.clear();
   }
@@ -21,17 +24,13 @@ public class SpielManagerClient extends SpielManager {
     handShakePacket[0] = 0;
     String name = uim.buttons.get(6).text;
     char[] nameChars = name.toCharArray();
-
     for (int i = 1; i < handShakePacket.length; i++) {
-
       if (i-1 >= nameChars.length) {
         handShakePacket[i] = -1;
         break;
       }
-
       handShakePacket[i] = byte(nameChars[i-1]);
     }
-
     client.write(handShakePacket);
   }
 
@@ -61,7 +60,7 @@ public class SpielManagerClient extends SpielManager {
         if (myId == -1) {
           if (packet[2] == 1)
             jointext = "Die Lobby ist voll";
-          else 
+          else
             jointext = "Das Spiel läuft bereits";
           j = 0;
           client.stop();
@@ -118,12 +117,39 @@ public class SpielManagerClient extends SpielManager {
         exit();
       }
       break;
+      case(6): // chat
+      String message = "";
+      for (int i = 1; i < packet.length; i++) {
+        if (packet[i] == -1)
+          break;
+        message += char(packet[i]);
+      }
+      meldeChat(message);
+      break;
     }
   }
 
   void disconnect() {
     sendPacket(2, myId);
   }
+
+  // --- Chat-Methoden ---
+
+  void sendChat(String message) {
+    byte[] messagePacket = new byte[23];
+    messagePacket[0] = 6;
+    String name = message;
+    char[] nameChars = name.toCharArray();
+    for (int i = 1; i < messagePacket.length; i++) {
+      if (i-1 >= nameChars.length) {
+        messagePacket[i] = -1;
+        break;
+      }
+      messagePacket[i] = byte(nameChars[i-1]);
+    }
+    client.write(messagePacket);
+  }
+
   // --- Spielablauf-Methode ---
 
   public void spielAblauf() {
@@ -143,18 +169,8 @@ public class SpielManagerClient extends SpielManager {
   // --- Logik-Methoden ---
 
   protected void init() {
-    /*for (int i = 0; i < akSpieler.size(); i++) {
-     println(akSpieler.get(i));
-     }
-     println(myId);*/
     uim.buttons.get(1).caninteract = false;
     programmstart = 60 * 3 + 1;
-    meldeDialog("Angemeldet als Spieler: " + (myId + 2));
-    meldeDialog("Dein Name: " + uim.buttons.get(6).text);
-    meldeDialog("------------------------------------");
-    meldeDialog("ONLINE SPIEL START:");
-    meldeDialog("------------------------------------");
-    meldeDialog("Spieler " + (spieler + 1) + ": " + akSpieler.get(spieler).name + " ist am Zug");
     surface.setTitle("Ziel_15: Online_Match");
     mode = 3;
   }
@@ -162,17 +178,12 @@ public class SpielManagerClient extends SpielManager {
   public void gewonnen() {
     if (mode == 3) {
       mode++;
-      meldeDialog("------------------------------------");
-      meldeDialog("SPIEL ENDE:");
-      meldeDialog("------------------------------------");
       Spieler gewinner = getWinner();
       if (gewinner == null) {
-        meldeDialog("Unentschieden");
+        meldeDaten("Unentschieden");
       } else {
-        meldeDialog(gewinner.getName() + " hat gewonnen.");
-        meldeDialog(gewinner.gibDaten());
+        meldeDaten("Winner:\n" + gewinner.getName());
       }
-      meldeDialog("------------------------------------");
       meldeDialog("Noch ein mal? Warte auf " + akSpieler.get(0).name);
     }
   }

@@ -250,3 +250,110 @@ public class StartButton extends Button {
     uim.buttons.get(1).caninteract = false;
   }
 }
+
+public class WertenButton extends Button {
+
+  // --- Konstruktoren ---
+
+  public WertenButton(int x, int y, int w, int h, String text, int s) {
+    super(x, y, w, h, text, s);
+  }
+
+  // --- Methoden ---
+
+  public void onClick() {
+    caninteract = false;
+    fill(0);
+    textAlign(CENTER, TOP);
+    text("sending...", 300, 410);
+    fill(#F5D100);
+    textAlign(TOP, LEFT);
+    uim.buttons.get(7).caninteract = false;
+    manager.werten = 1;
+  }
+}
+
+public class NeinButton extends Button {
+
+  // --- Konstruktoren ---
+
+  public NeinButton(int x, int y, int w, int h, String text, int s) {
+    super(x, y, w, h, text, s);
+  }
+
+  // --- Methoden ---
+
+  public void onClick() {
+    caninteract = false;
+    fill(0);
+    textAlign(CENTER, TOP);
+    text("sending...", 300, 410);
+    fill(#F5D100);
+    textAlign(TOP, LEFT);
+    uim.buttons.get(8).caninteract = false;
+    manager.werten = 2;
+  }
+}
+
+public class SendButton extends Button {
+
+  // --- Konstruktoren ---
+
+  public SendButton(int x, int y) {
+    super(x, y, 50, 50, null, 0);
+  }
+
+  // --- Methoden ---
+
+  public void render() {
+    color fill = #F5D100;
+    stroke(#FFFFFF);
+    strokeWeight(5);
+    if (mouseX > x && mouseX < x+w) {
+      if (mouseY > y && mouseY < y+h) {
+        fill = #F2F702;
+      }
+    }
+    fill(fill);
+    rect(x, y, w, h);
+    fill(255);
+    noStroke();
+    triangle(x + 10, y + 10, x + 10, y + 40, x + 45, y + 25);
+    strokeWeight(2);
+    stroke(fill);
+    line(x + 9, y + 25, x + 46, y + 25);
+    stroke(#FFFFFF);
+    strokeWeight(5);
+    textSize(20);
+  }
+
+  public void onClick() {
+    confirmMessage();
+  }
+}
+
+public class ChatBoxButton extends Button {
+
+  // --- Konstruktoren ---
+
+  public ChatBoxButton(int x, int y, int w, int h, String text, int s) {
+    super(x, y, w, h, text, s);
+    textbackup = text;
+  }
+
+  // --- Reset-Methode ---
+
+  public void reset() {
+    show = false;
+    text = textbackup;
+    inventory.clear();
+  }
+
+  // --- Methoden ---
+
+  public void onClick() {
+    textlocked = false;
+    text = show? text : "|";
+    show = true;
+  }
+}

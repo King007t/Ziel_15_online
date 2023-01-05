@@ -99,19 +99,15 @@ public class Spieler {
     int entscheiden = entscheiden();
     if (entscheiden == 1) {
       werten();
-      meldeDialog(gibDaten());
+      meldeDaten(gibDaten());
     } else if (entscheiden == 2) {
-      meldeDialog(gibDaten());
+      meldeDaten(gibDaten());
     }
     if (entscheiden > 0) {
       bereitsGewuerfelt = false;
       manager.addtoSpieler(1);
       if (manager.akSpieler.size() <= manager.getSpieler()) {
         manager.setSpieler(0);
-      }
-      if (!(manager.akSpieler.get(manager.akSpieler.size() - 1).name == name && anzWuerfe >= 10)) {
-        meldeDialog("------------------------------------");
-        meldeDialog("Spieler " + (manager.getSpieler() + 1) + ": " + manager.akSpieler.get(manager.getSpieler()).name + " ist am Zug");
       }
     }
   }
@@ -122,12 +118,11 @@ public class Spieler {
   public int entscheiden() {
     if (istFertig()) {
       meldeDialog("Du hast bereits 6 Wuerfe gewertet");
-      meldeDialog(gibDaten());
+      meldeDaten(gibDaten());
       delay(1000);
       return 3;
     } else if ((11 - anzWuerfe) <= (6 - anzGewertet)) {
-      meldeDialog("Da erst " + anzGewertet + " von 6 Wuerfen gewertet wurden und du noch " + (10 - anzWuerfe) + " von 10 übrig"  );
-      meldeDialog("hast, wird der Wurf gewertet.");
+      meldeDialog("Da erst " + anzGewertet + " von 6 Wuerfen gewertet wurden und du noch " + (10 - anzWuerfe) + " von 10 übrig hast, wird der Wurf gewertet."  );
       delay(1000);
       return 1;
     } else {
@@ -161,7 +156,7 @@ public class Spieler {
 
   // Interne Hilfsmethode, um Daten auszugeben. Ersetzt toString().
   public String gibDaten() {
-    return ("Spieler: " + name + ";   Stand: " + aktStand + "/15;   AnzWuerfe: " + anzWuerfe + "/10;   AnzGewertet: "+ anzGewertet + "/6;");
+    return ("Stand: " + aktStand + "/15\nWuerfe: " + anzWuerfe + "/10\nGewertet: "+ anzGewertet + "/6");
   }
 
   // Interne Hilfsmethode für Dialogfenster der Entscheidung/Wertung.
@@ -169,6 +164,7 @@ public class Spieler {
   // gewertet werden soll (true) oder nicht (false).
   public int wertungsDialog() {
     if (!hideMessage) {
+      meldeDaten(gibDaten());
       meldeDialog("Soll die eben geworfene " + aktWurf + " gewertet werden? JA(j) oder NEIN(n)? ");
       hideMessage = true;
     }
